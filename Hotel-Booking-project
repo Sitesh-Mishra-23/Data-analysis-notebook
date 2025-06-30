@@ -1,0 +1,606 @@
+
+Hotel Booking.ipynb
+Hotel Booking.ipynb_
+Project Name - Hotel Booking Analysis
+Project Type - EDA/Regression/Classification/Unsupervised
+Contribution - Individual
+Name - Sitesh Mishra
+Project Summary -
+In this project, I developed a comprehensive data analysis dashboard using Python to explore and visualize key revenue patterns in hotel bookings. The dataset, sourced from real-world booking records, includes over 30 features related to guest reservations, including booking dates, length of stay, cancellation status, room types, pricing (ADR), and customer behavior. Leveraging the power of Pandas, NumPy, and Matplotlib, the project transforms raw Excel data into meaningful revenue insights to assist hotel management in optimizing strategies, pricing, and resource allocation.
+
+(A) Objectives The primary goal was to extract, process, and visualize revenue-related metrics from historical hotel booking data, with a focus on:
+
+Estimating monthly and annual revenue trends
+
+Comparing revenue between different hotel types (City Hotel vs Resort Hotel)
+
+Investigating the impact of lead time, cancellations, and booking durations on revenue
+
+Creating intuitive and professional visualizations for stakeholders
+
+Practicing core data science skills: data cleaning, feature engineering, group analysis, and visual storytelling
+
+(B) Tools & Technologies Used Python: The backbone language for data handling and analysis
+
+Pandas: For data loading, manipulation, and grouping
+
+NumPy: For numerical operations such as calculating total revenue
+
+Matplotlib: To create custom, publication-ready charts and graphs
+
+(C) Approach Data Ingestion & Cleaning:
+
+Loaded the Excel sheet (Hotel Bookings) using Pandas.
+
+Checked for and handled null values in critical fields like adr, stays_in_week_nights, and stays_in_weekend_nights.
+
+Filtered out canceled bookings (is_canceled == 0) to focus only on revenue-generating records.
+
+Feature Engineering:
+
+Created a new column total_nights = stays_in_week_nights + stays_in_weekend_nights.
+
+Calculated estimated revenue per booking using: revenue = adr * total_nights
+
+Added a month_year field by combining arrival_date_month and arrival_date_year for time-based grouping.
+
+Revenue Analysis:
+
+Aggregated total revenue by:
+
+Month & Year (to show seasonal and yearly patterns)
+
+Hotel Type (City vs Resort)
+
+Compared revenue distribution by customer type (customer_type) and booking lead time.
+
+Visualization:
+
+Plotted a multi-line graph of monthly revenue across years.
+
+Created bar charts to compare hotel types.
+
+Designed a heatmap (optional) showing revenue correlation with stay duration and booking lead time.
+
+Ensured all charts were clearly labeled, color-coded, and annotated for insights.
+
+(D) Key Findings City Hotels consistently generated higher revenue, especially in the months of July and August.
+
+A longer lead time correlated with higher ADR but didn’t always lead to longer stays.
+
+Bookings with special requests tended to bring in higher revenue — a subtle signal that premium guests tend to personalize.
+
+Revenue dips in early months (Jan–Feb), indicating potential off-season for targeted marketing strategies.
+
+(E) Conclusion & Learnings This project offered a deep dive into real-world data analysis — from raw Excel data to a revenue dashboard packed with actionable insights. It strengthened my understanding of:
+
+Feature engineering in context of business KPIs
+
+Data grouping and aggregation for trend discovery
+
+Visual storytelling to drive decisions
+
+How even basic tools like Pandas and Matplotlib can power full-scale business intelligence
+
+Going forward, this project can evolve into a fully interactive web dashboard using tools like Streamlit or Plotly Dash, or even integrate predictive modeling to forecast future revenue based on historical trends.
+
+GitHub Link -
+1 cell hidden
+Problem Statement
+How can hotel management effectively analyze booking data to uncover actionable revenue trends, optimize pricing strategies, and improve operational efficiency across different hotel types?
+
+Define Your Business Objective?
+To analyze hotel booking data and uncover key revenue trends that help hotel managers make data-driven decisions on pricing, marketing, and resource allocation — ultimately boosting revenue and operational efficiency.
+
+General Guidelines : -
+Well-structured, formatted, and commented code is required.
+
+Exception Handling, Production Grade Code & Deployment Ready Code will be a plus. Those students will be awarded some additional credits.
+
+The additional credits will have advantages over other students during Star Student selection.
+
+    [ Note: - Deployment Ready Code is defined as, the whole .ipynb notebook should be executable in one go
+              without a single error logged. ]
+Each and every logic should have proper comments.
+
+You may add as many number of charts you want. Make Sure for each and every chart the following format should be answered.
+
+# Chart visualization code
+Why did you pick the specific chart?
+What is/are the insight(s) found from the chart?
+Will the gained insights help creating a positive business impact? Are there any insights that lead to negative growth? Justify with specific reason.
+You have to create at least 20 logical & meaningful charts having important insights.
+[ Hints : - Do the Vizualization in a structured way while following "UBM" Rule.
+
+U - Univariate Analysis,
+
+B - Bivariate Analysis (Numerical - Categorical, Numerical - Numerical, Categorical - Categorical)
+
+M - Multivariate Analysis ]
+
+Let's Begin !
+1. Know Your Data
+Import Libraries
+
+[7]
+0s
+# Import Libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+Dataset Loading
+
+[8]
+1m
+# Load Dataset
+df=pd.read_excel("/content/drive/MyDrive/Colab Notebooks/Datasets/Hotel Bookings.xlsx")
+
+[9]
+3s
+from google.colab import drive
+drive.mount('/content/drive')
+Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount("/content/drive", force_remount=True).
+Dataset First View
+
+[ ]
+1 cell hidden
+Dataset Rows & Columns count
+
+[ ]
+1 cell hidden
+Dataset Information
+
+[ ]
+6 cells hidden
+What did you know about your dataset?
+The dataset contains hotel booking records with 32 columns, including booking details, guest information, stay duration, and financial data. It helps analyze trends in revenue, cancellations, guest behavior, and booking patterns across City and Resort hotels.
+
+2. Understanding Your Variables
+
+[16]
+0s
+# Dataset Columns
+df.columns
+Index(['hotel', 'is_canceled', 'lead_time', 'arrival_date_year',
+       'arrival_date_month', 'arrival_date_week_number',
+       'arrival_date_day_of_month', 'stays_in_weekend_nights',
+       'stays_in_week_nights', 'adults', 'children', 'babies', 'meal',
+       'country', 'market_segment', 'distribution_channel',
+       'is_repeated_guest', 'previous_cancellations',
+       'previous_bookings_not_canceled', 'reserved_room_type',
+       'assigned_room_type', 'booking_changes', 'deposit_type', 'agent',
+       'company', 'days_in_waiting_list', 'customer_type', 'adr',
+       'required_car_parking_spaces', 'total_of_special_requests',
+       'reservation_status', 'reservation_status_date'],
+      dtype='object')
+
+[17]
+0s
+# Dataset Describe
+df.describe()
+
+Variables Description
+hotel – Type of hotel (City or Resort)
+
+is_canceled – Whether the booking was canceled (1 = Yes, 0 = No)
+
+lead_time – Days between booking and arrival
+
+arrival_date_* – Year, month, week, and day of arrival
+
+stays_in_week_nights / weekend_nights – Nights stayed during the week/weekend
+
+adults, children, babies – Number of guests
+
+meal – Meal plan selected
+
+country – Guest’s country of origin
+
+market_segment – Booking source (e.g., Online, Offline)
+
+distribution_channel – How the booking was distributed
+
+is_repeated_guest – If the guest has booked before
+
+previous_cancellations – Past cancellations by the guest
+
+reserved_room_type / assigned_room_type – Room types booked vs. assigned
+
+booking_changes – Number of changes to the reservation
+
+deposit_type – Type of deposit paid (if any)
+
+agent / company – Booking agent or company ID
+
+days_in_waiting_list – Days the booking was on hold
+
+customer_type – Guest type (Transient, Group, etc.)
+
+adr – Average Daily Rate (price per room per night)
+
+required_car_parking_spaces – Number of parking spaces requested
+
+total_of_special_requests – Number of guest requests (like extra bed, etc.)
+
+reservation_status – Final status (Check-Out, Canceled, No-Show)
+
+reservation_status_date – Date when the status was set
+
+Check Unique Values for each variable.
+
+[18]
+0s
+# Check Unique Values for each variable.
+df.nunique()
+
+
+3. Data Wrangling
+Data Wrangling Code
+
+[19]
+0s
+# Write your code to make your dataset analysis ready.
+# Drop rows with missing values in essential columns
+essential_cols = ['adr', 'stays_in_week_nights', 'stays_in_weekend_nights']
+df.dropna(subset=essential_cols, inplace=True)
+
+# Fill other missing values (like 'children', 'agent', 'company') with reasonable defaults
+df['children'] = df['children'].fillna(0)
+df['agent'] = df['agent'].fillna(0)
+df['company'] = df['company'].fillna(0)
+df['country'] = df['country'].fillna('Unknown')
+
+
+# Convert data types where necessary
+df['agent'] = df['agent'].astype(int)
+df['company'] = df['company'].astype(int)
+df['children'] = df['children'].astype(int)
+
+# Create new feature: total stay nights
+df['total_nights'] = df['stays_in_week_nights'] + df['stays_in_weekend_nights']
+
+# Create revenue column (ADR × total_nights), but only for non-canceled bookings
+df['revenue'] = np.where(df['is_canceled'] == 0, df['adr'] * df['total_nights'], 0)
+
+#  Create a combined Month-Year field for time series grouping
+df['month_year'] = df['arrival_date_month'] + '-' + df['arrival_date_year'].astype(str)
+
+#  Reset index (clean start)
+df.reset_index(drop=True, inplace=True)
+df.head()
+
+
+What all manipulations have you done and insights you found?
+(A) Manipulations Done: Handled missing values (children, agent, company, country)
+
+Removed rows with critical nulls (adr, stay columns)
+
+Converted data types (to int)
+
+Created new columns:
+
+total_nights = week + weekend nights
+
+revenue = ADR × total nights (only for non-canceled bookings)
+
+month_year for time-series grouping
+
+Checked for duplicates and visualized missing data
+
+(B) Insights Found: City hotels earned consistent revenue; Resort hotels peaked in summer
+
+Higher lead time slightly increases cancellation chance
+
+Guests with more special requests contributed higher revenue
+
+Bookings spike in July–August; drop in Jan–Feb (off-season)
+
+4. Data Vizualization, Storytelling & Experimenting with charts : Understand the relationships between variables
+Chart - 1
+
+[20]
+0s
+# Chart - 1 visualization code
+# Filter only non-canceled bookings
+df_clean = df[df['is_canceled'] == 0]
+
+# Group revenue by month and hotel
+rev = df_clean.groupby(['arrival_date_month', 'hotel'])['revenue'].sum().unstack()
+
+# Reorder months for correct x-axis display
+rev = rev.reindex(['January','February','March','April','May','June',
+                   'July','August','September','October','November','December'])
+
+# Plotting
+rev.plot(kind='line', marker='o', figsize=(10, 5))
+plt.title('Monthly Revenue by Hotel Type')
+plt.xlabel('Month')
+plt.ylabel('Revenue')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+1. Why did you pick the specific chart?
+Because it shows: 1.When each hotel earns the most 2.Which hotel performs better in which month 3.Super useful for seasonal planning
+
+2. What is/are the insight(s) found from the chart?
+1.Resort Hotels peak in summer (July & August) – likely due to holidays and tourism season.
+
+2.City Hotels show steady revenue year-round, with slight drops in early months (Jan–Feb).
+
+3.Off-season dip is visible for both hotel types during winter months (especially January).
+
+4.City Hotels outperform Resort Hotels in the off-peak months — suggesting more business travel during non-vacation times.
+
+3. Will the gained insights help creating a positive business impact?
+Are there any insights that lead to negative growth? Justify with specific reason.
+
+Yes, the insights gained from the chart can create a positive business impact by helping hotels plan better for high and low seasons. For example, knowing that Resort Hotels peak in revenue during July and August allows management to increase pricing, staff accordingly, and focus marketing efforts during those months. City Hotels, which show consistent revenue, can focus on business travelers year-round. However, if the observed dip in January and February is ignored, it could lead to underutilized resources and missed revenue opportunities. While the insights themselves don’t directly lead to negative growth, failing to act on them or relying too heavily on peak seasons can result in poor performance during off-peak periods.
+
+Chart - 2
+
+[35]
+0s
+# Chart - 2 visualization code
+
+# Group by reserved room type and calculate average ADR
+adr_by_room = df.groupby('reserved_room_type')['adr'].mean().sort_values()
+
+# Plot
+adr_by_room.plot(kind='bar', color='lightgreen')
+plt.title('Average Daily Rate (ADR) by Room Type')
+plt.xlabel('Room Type')
+plt.ylabel('Average Daily Rate')
+plt.tight_layout()
+plt.show()
+
+
+1. Why did you pick the specific chart?
+1.To identify which room types generate more revenue per night
+
+2.Helps in pricing strategy and deciding which rooms to promote or upsell
+
+3.Reveals underperforming room types with low ADR
+
+2. What is/are the insight(s) found from the chart?
+The chart shows that some room types have significantly higher ADR, meaning they generate more revenue per night. These high-ADR rooms (like Type H or G) are ideal for upselling. Lower ADR rooms may be underpriced or used for budget guests, suggesting a chance to review pricing or promote them in bulk deals.
+
+3. Will the gained insights help creating a positive business impact?
+Are there any insights that lead to negative growth? Justify with specific reason.
+
+Yes, the insights help increase revenue by highlighting high-ADR room types for upselling. No direct negative impact, but ignoring low-ADR rooms could mean missed revenue opportunities.
+
+Chart - 3
+
+[36]
+0s
+# Chart - 3 visualization code
+
+# Calculate cancellation rate per customer type
+cancel_by_type = df.groupby('customer_type')['is_canceled'].mean() * 100
+
+# Plot
+cancel_by_type.plot(kind='bar', color='coral')
+plt.title('Cancellation Rate by Customer Type')
+plt.ylabel('Cancellation Rate (%)')
+plt.xlabel('Customer Type')
+plt.tight_layout()
+plt.show()
+
+
+1. Why did you pick the specific chart?
+I chose this chart to understand which customer types cancel most often, as cancellations directly impact revenue and resource planning. By identifying high-risk groups (like "Group" or "Transient-party"), the hotel can take action — such as stricter policies or better follow-up — to reduce cancellations and improve booking reliability.
+
+2. What is/are the insight(s) found from the chart?
+The chart shows that group and transient-party customers have the highest cancellation rates, while contract customers cancel the least. This means group bookings are less reliable and may need stricter policies.
+
+3. Will the gained insights help creating a positive business impact?
+Are there any insights that lead to negative growth? Justify with specific reason.
+
+the insight helps reduce cancellations by targeting high-risk customer types with stricter policies. If ignored, frequent group cancellations can lead to revenue loss and poor room planning.
+
+Chart - 4
+
+[37]
+0s
+# Chart - 4 visualization code
+df['arrival_date_month'].value_counts().plot(kind='bar', color='lightblue')
+plt.title('Bookings per Month')
+plt.xlabel('Month')
+plt.ylabel('Total Bookings')
+plt.show()
+
+
+1. Why did you pick the specific chart?
+I picked this chart because it helps us understand when people book the most throughout the year. It's simple, clear, and shows the seasonal demand trends — which months are busy and which are slow. This is super useful for hotels to plan pricing, staff, and offers. Plus, it’s perfect for beginners learning how to connect data to real business decisions.
+
+2. What is/are the insight(s) found from the chart?
+The chart shows that bookings are highest in July and August, indicating peak season, while January and February have the least bookings, suggesting off-season. This helps hotels focus marketing and pricing strategies based on demand.
+
+3. Will the gained insights help creating a positive business impact?
+Are there any insights that lead to negative growth? Justify with specific reason.
+
+Yes, the insight helps boost business by showing peak and off-season months. Hotels can raise prices in busy months and offer discounts in slow months. Ignoring this may lead to empty rooms and lost revenue.
+
+Chart - 5
+
+[38]
+0s
+# Chart - 5 visualization code
+
+# Group by number of special requests and calculate cancellation rate
+cancel_by_request = df.groupby('total_of_special_requests')['is_canceled'].mean() * 100
+
+# Plot
+cancel_by_request.plot(kind='bar', color='orchid')
+plt.title('Cancellation Rate by Number of Special Requests')
+plt.xlabel('Total Special Requests')
+plt.ylabel('Cancellation Rate (%)')
+plt.tight_layout()
+plt.show()
+
+
+1. Why did you pick the specific chart?
+chose this chart to see if guests with more special requests are less likely to cancel. It helps identify serious or loyal customers and lets hotels focus on them to reduce cancellations.
+
+2. What is/are the insight(s) found from the chart?
+The chart shows that guests with more special requests have a lower cancellation rate, while those with no requests cancel the most. This means guests making requests are more serious about their bookings.
+
+3. Will the gained insights help creating a positive business impact?
+Are there any insights that lead to negative growth? Justify with specific reason.
+
+Yes, the insight helps create a positive impact by identifying serious customers through special requests, allowing hotels to prioritize and retain them.
+
+No direct negative impact, but ignoring this could lead to missed chances for improving guest loyalty and reducing cancellations.
+
+Chart - 6
+
+[39]
+0s
+# Chart - 6 visualization code
+# Calculate average ADR by market segment
+adr_by_segment = df.groupby('market_segment')['adr'].mean().sort_values()
+
+# Plot
+adr_by_segment.plot(kind='bar', color='mediumseagreen')
+plt.title('Average Daily Rate by Market Segment')
+plt.xlabel('Market Segment')
+plt.ylabel('Average Daily Rate')
+plt.tight_layout()
+plt.show()
+
+
+1. Why did you pick the specific chart?
+picked this chart to find out which market segments bring in the most revenue per room. It helps the hotel focus on the most profitable booking sources and improve pricing or marketing strategies based on where the money comes from.
+
+2. What is/are the insight(s) found from the chart?
+The chart shows that Corporate and Direct market segments have the highest average daily rates (ADR), meaning they generate more revenue per booking. In contrast, Online Travel Agencies (OTA) bring in a lower ADR, indicating they may drive volume but not high profit per room. This helps the hotel identify which segments are most valuable and where to focus for higher revenue.
+
+3. Will the gained insights help creating a positive business impact?
+Are there any insights that lead to negative growth? Justify with specific reason.
+
+Yes, the insight helps boost profit by focusing on high-ADR segments like Corporate and Direct. Relying too much on low-ADR segments like OTA may hurt revenue despite high bookings.
+
+Chart - 7
+
+[40]
+0s
+# Chart - 7 visualization code
+# Count bookings by country
+top_countries = df['country'].value_counts().head(10)
+
+# Plot
+top_countries.plot(kind='bar', color='skyblue')
+plt.title('Top 10 Countries by Bookings')
+plt.xlabel('Country')
+plt.ylabel('Number of Bookings')
+plt.tight_layout()
+plt.show()
+
+
+1. Why did you pick the specific chart?
+I picked this chart to find out which countries most guests come from. It helps hotels understand their key markets and focus on targeted marketing, language support, or promotions for those countries to attract more bookings and improve guest experience.
+
+2. What is/are the insight(s) found from the chart?
+The chart shows that most bookings come from a few countries like Portugal, the UK, and France, meaning these are the hotel’s top markets. This insight helps focus marketing efforts, offer localized services, and build stronger connections with frequent international guests.
+
+3. Will the gained insights help creating a positive business impact?
+Are there any insights that lead to negative growth? Justify with specific reason.
+
+Yes, the insight helps boost business by targeting top countries with marketing and services. But over-reliance on a few countries can be risky if travel drops, so diversifying is important.
+
+Chart - 8
+
+[ ]
+7 cells hidden
+Chart - 9
+
+[ ]
+7 cells hidden
+Chart - 10
+
+[ ]
+7 cells hidden
+Chart - 11
+
+[ ]
+7 cells hidden
+Chart - 12
+
+[ ]
+7 cells hidden
+Chart - 13
+
+[ ]
+7 cells hidden
+Chart - 14 - Correlation Heatmap
+
+[41]
+0s
+# Correlation Heatmap visualization code
+
+# Correlation matrix
+corr = df.corr(numeric_only=True)
+
+# Basic heatmap
+plt.matshow(corr, cmap='coolwarm')
+plt.title('Correlation Heatmap', fontsize=14)
+plt.colorbar()
+plt.xticks(range(len(corr.columns)), corr.columns, rotation=90)
+plt.yticks(range(len(corr.columns)), corr.columns)
+plt.show()
+
+
+1. Why did you pick the specific chart?
+I picked this chart to easily see how different numerical features are related to each other. A correlation heatmap helps identify patterns, like which factors are strongly linked to cancellations, revenue, or lead time, so we can focus on the most impactful variables in our analysis or predictions.
+
+2. What is/are the insight(s) found from the chart?
+The heatmap shows that lead time has a strong positive correlation with cancellations — meaning the longer people wait between booking and arrival, the more likely they are to cancel. Also, total nights stayed and ADR (average daily rate) are positively related to revenue, which makes sense since longer, higher-priced stays bring in more money.
+
+Chart - 15 - Pair Plot
+
+[42]
+7s
+# Pair Plot visualization code
+import seaborn as sns
+
+# Basic pair plot with 3 variables
+sns.pairplot(df[['lead_time', 'adr', 'is_canceled']])
+plt.show()
+
+
+1. Why did you pick the specific chart?
+I picked the pair plot because it shows the relationship between multiple numerical features in one single chart. It helps us quickly spot patterns, trends, or correlations, like how lead time affects cancellations or how ADR relates to booking behavior — all at a glance, without writing multiple plots.
+
+2. What is/are the insight(s) found from the chart?
+The pair plot shows that higher lead time is often linked to more cancellations, and bookings with higher ADR (room rates) tend to be less likely to cancel. Also, most bookings cluster around lower ADR and lead time, showing typical guest behavior.
+
+5. Solution to Business Objective
+What do you suggest the client to achieve Business Objective ?
+Explain Briefly.
+
+To help the client achieve their business objective of maximizing revenue and reducing cancellations, I suggest the following:
+
+1.Focus on High-Value Segments
+
+Promote Corporate and Direct bookings, as they have higher ADR and lower cancellation rates. Offer loyalty benefits or flexible check-in for these customers.
+
+2.Reduce Cancellations
+
+Encourage non-refundable bookings with small discounts. Apply stricter policies for customers with high lead times or no special requests (who are more likely to cancel). Use deposit policies wisely to filter unserious bookings.
+
+3.Optimize Seasonal Pricing
+
+Raise prices in peak months (July, August). Offer discounts and bundled packages in off-peak seasons (Jan, Feb) to fill rooms.
+
+4.Target Top Markets
+
+Focus ads and language/localized services in countries with the most bookings (like Portugal, UK). Expand outreach in similar markets to grow.
+
+Conclusion
+Through detailed analysis of the hotel booking dataset using pandas, NumPy, and matplotlib, we uncovered key insights that can directly impact business decisions. We found that lead time, customer type, deposit policy, and special requests strongly influence booking cancellations. Corporate and direct bookings bring higher revenue, while group and OTA bookings tend to cancel more often. Seasonal trends show peak demand in summer months like July and August, and lower demand in January and February.
+
+By acting on these insights, the hotel can implement smarter pricing strategies, reduce cancellations, target high-value customers, and optimize operations across the year. This data-driven approach lays a strong foundation for improving profitability and guest satisfaction.
+
+Hurrah! You have successfully completed your EDA Capstone Project !!!
+Colab paid products - Cancel contracts here
