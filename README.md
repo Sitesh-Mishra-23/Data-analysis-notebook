@@ -1,4 +1,4 @@
-# Machine Learning Projects
+# Data Analysis Projects
 
 # 📊 Data Analysis in Google Colab
 
