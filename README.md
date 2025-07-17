@@ -1,4 +1,4 @@
-# data-analysis-notebook
+# Machine Learning Projects
 
 # 📊 Data Analysis in Google Colab
 
